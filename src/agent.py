@@ -1,15 +1,15 @@
-from langchain_ollama import ChatOllama
+from langchain_groq import ChatGroq
 from langchain.agents import create_agent
 
-from src.config import OLLAMA_MODEL, OLLAMA_TEMPERATURE
+from src.config import GROQ_TEMPERATURE
 from tools.business_data_tool import get_business_metrics
 from tools.order_risk_tool import investigate_order_delivery_risk
 from tools.rag_tool import search_delivery_policy
 
 
-llm = ChatOllama(
-    model=OLLAMA_MODEL,
-    temperature=OLLAMA_TEMPERATURE
+llm = ChatGroq(
+    model="openai/gpt-oss-20b",
+    temperature=GROQ_TEMPERATURE
 )
 
 

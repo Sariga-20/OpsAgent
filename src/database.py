@@ -9,16 +9,16 @@ load_dotenv()
 
 
 def get_connection():
-    """
-    Create and return a PostgreSQL database connection.
-    """
+    database_url = os.getenv("POSTGRES_URL")
 
-    connection = psycopg2.connect(
+    if database_url:
+        return psycopg2.connect(database_url)
+
+    return psycopg2.connect(
         host=os.getenv("POSTGRES_HOST", "localhost"),
         port=os.getenv("POSTGRES_PORT", "5432"),
         database=os.getenv("POSTGRES_DB", "businesspulse"),
         user=os.getenv("POSTGRES_USER", "postgres"),
         password=os.getenv("POSTGRES_PASSWORD")
     )
-
     return connection

@@ -75,17 +75,14 @@ def action_node(state):
         "status": "Completed"
     }
 
-from langchain_ollama import ChatOllama
+from langchain_groq import ChatGroq
 
-from src.config import (
-    OLLAMA_MODEL,
-    OLLAMA_TEMPERATURE
-)
+from src.config import GROQ_TEMPERATURE
 
 
-llm = ChatOllama(
-    model=OLLAMA_MODEL,
-    temperature=OLLAMA_TEMPERATURE
+llm = ChatGroq(
+    model="openai/gpt-oss-20b",
+    temperature=GROQ_TEMPERATURE
 )
 
 

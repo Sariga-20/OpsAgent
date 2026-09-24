@@ -6,7 +6,7 @@ xgboost
 scikit-learn
 langchain
 langgraph
-langchain-ollama
+langchain-groq
 langchain-community
 langchain-chroma
 langchain-huggingface

@@ -6,15 +6,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-# Ollama configuration
-OLLAMA_MODEL = os.getenv(
-    "OLLAMA_MODEL",
-    "llama3.2:3b"
-)
-
-OLLAMA_TEMPERATURE = float(
+# Groq configuration
+GROQ_TEMPERATURE = float(
     os.getenv(
-        "OLLAMA_TEMPERATURE",
+        "GROQ_TEMPERATURE",
         "0"
     )
 )

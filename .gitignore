@@ -18,5 +18,8 @@ data/chroma/
 .DS_Store
 Thumbs.db
 
+# Database dump
+*.dump
+
 # VS Code
 .vscode/

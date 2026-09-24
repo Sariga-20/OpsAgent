@@ -1,0 +1,43 @@
+E-COMMERCE DELIVERY OPERATIONS POLICY
+
+1. Delivery Risk Management
+
+Orders identified as having a high probability of late delivery should be reviewed by the operations team before the estimated delivery date.
+
+2. Seller Performance
+
+Sellers with a history of late deliveries should receive additional monitoring.
+
+If a seller's historical late-delivery rate is consistently high, the operations team should investigate the seller's recent orders and delivery performance.
+
+3. Geographic Risk
+
+Orders involving sellers and customers located in different states may require additional monitoring because cross-state delivery can involve longer transportation distances and additional logistics steps.
+
+4. High-Risk Orders
+
+Orders with multiple risk indicators should receive higher priority during operational review.
+
+Risk indicators may include:
+
+- High seller historical late-delivery rate
+- Short estimated delivery time
+- High freight cost
+- Cross-state seller/customer location
+- Multiple items or sellers involved in an order
+
+5. Recommended Operational Actions
+
+For high-risk orders, the operations team may:
+
+- Review the seller's recent delivery performance
+- Contact the seller for an updated fulfillment status
+- Verify the expected delivery date
+- Prioritize monitoring of the shipment
+- Escalate significant delivery risks to the operations manager
+
+6. Human Approval
+
+Important operational actions that affect customers, sellers, or orders should require human approval before execution.
+
+The AI system may investigate problems and recommend actions, but it should not independently execute consequential operational actions without human approval.

@@ -1,23 +1,29 @@
 # 🤖 OpsAgent — Autonomous Business Operations Agent
 
-OpsAgent is an AI-powered business operations investigation system that combines **LLM reasoning, business data analysis, machine learning predictions, RAG-based policy retrieval, and human approval** to investigate operational risks.
+OpsAgent is an AI-powered business operations investigation system that combines **business data analysis, machine learning, RAG-based policy retrieval, LLM reasoning, deterministic policy evaluation, and human approval** into one operational workflow.
 
-The system can investigate an e-commerce order, retrieve relevant business data, generate a late-delivery risk prediction using the OpsPredict ML model, retrieve operational policy evidence, identify deterministic policy indicators, generate an evidence-based analysis, and require human approval before executing an operational action.
+The system investigates an e-commerce order, retrieves operational data from PostgreSQL, generates a late-delivery risk prediction using the **OpsPredict XGBoost model**, retrieves relevant delivery-policy evidence using RAG, evaluates deterministic policy indicators, generates an evidence-based analysis with **Groq**, and requires explicit human approval before executing an operational action.
+
+## 🚀 Live Demo
+
+**Streamlit:** https://opsagent-3bnmvb23ipfxfgdauzg7q8.streamlit.app
+
+> The live application uses Streamlit Community Cloud, Neon PostgreSQL, and Groq. Database credentials and API keys are stored as deployment secrets and are not committed to the repository.
 
 ---
 
 ## 🎯 Project Objective
 
-The goal of OpsAgent is to demonstrate how an AI agent can combine multiple business intelligence and AI capabilities into a single operational workflow.
+OpsAgent demonstrates how an AI agent can combine multiple business intelligence and AI capabilities into a controlled operational workflow.
 
-Instead of only generating an LLM response, OpsAgent uses specialized tools to:
+Instead of relying on an LLM alone, OpsAgent uses specialized components to:
 
-1. Investigate an order using PostgreSQL data
-2. Generate a machine-learning risk prediction
-3. Retrieve relevant operational policies using RAG
+1. Investigate an order using PostgreSQL business data
+2. Generate a machine-learning late-delivery prediction
+3. Retrieve relevant operational policy evidence using RAG
 4. Evaluate deterministic business-policy indicators
 5. Generate an evidence-based LLM analysis
-6. Request human approval
+6. Request explicit human approval
 7. Execute an operational action only after approval
 
 ---
@@ -25,56 +31,63 @@ Instead of only generating an LLM response, OpsAgent uses specialized tools to:
 ## 🏗️ Architecture
 
 ```text
-                    User / Business Question
-                              │
-                              ▼
-                       ┌─────────────┐
-                       │  OpsAgent   │
-                       └──────┬──────┘
-                              │
-                              ▼
-                         LLM - Ollama
-                              │
-              ┌───────────────┼───────────────┐
-              ▼               ▼               ▼
-        Business Data     ML Prediction       RAG
-            Tool              Tool             Tool
-              │               │               │
-              ▼               ▼               ▼
-        PostgreSQL        OpsPredict        ChromaDB
-                                           + Hugging Face
-              │               │               │
-              └───────────────┼───────────────┘
-                              ▼
-                       Investigation
-                              │
-                              ▼
-                    Policy Evaluation
-                              │
-                              ▼
-                       LLM Analysis
-                              │
-                              ▼
-                      Human Approval
-                         │          │
-                       Reject     Approve
-                         │          │
-                         ▼          ▼
-                      Stop       Action
-
+                         User
+                          │
+                          ▼
+                ┌──────────────────┐
+                │    Streamlit     │
+                │    Dashboard     │
+                └────────┬─────────┘
+                         │
+                         ▼
+                ┌──────────────────┐
+                │     OpsAgent     │
+                │   Investigation  │
+                └────────┬─────────┘
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+   Business Data     ML Prediction     RAG
+       Tool              Tool          Tool
+          │              │              │
+          ▼              ▼              ▼
+   Neon PostgreSQL   OpsPredict       ChromaDB
+                     XGBoost        + Hugging Face
+          │              │              │
+          └──────────────┼──────────────┘
+                         ▼
+                Policy Evaluation
+                         │
+                         ▼
+                      Groq LLM
+                         │
+                         ▼
+                Evidence-Based Analysis
+                         │
+                         ▼
+                 Human Approval
+                    /                         Reject      Approve
+                   │           │
+                   ▼           ▼
+                  Stop      Operational
+                              Action
 ```
+
 ---
+
 ## 🧠 Key Capabilities
 
 ### 1. Business Data Investigation
 
 OpsAgent retrieves order information and operational features from PostgreSQL.
 
+The project uses **Neon PostgreSQL** for the deployed application.
+
 ### 2. Machine Learning Risk Prediction
 
 The system integrates the **OpsPredict XGBoost model** to estimate the probability of late delivery.
 
-The model uses features such as:
+The prediction workflow uses operational features such as:
 
 - Seller historical performance
 - Estimated delivery time
@@ -87,13 +100,16 @@ The model uses features such as:
 
 ### 3. RAG-Based Policy Retrieval
 
-Operational policies are stored as documents and indexed using:
+Operational delivery policies are stored as documents and indexed for semantic retrieval using:
 
 - ChromaDB
 - Hugging Face sentence-transformer embeddings
 - LangChain
+- `all-MiniLM-L6-v2`
 
 OpsAgent retrieves relevant policy evidence before generating its analysis.
+
+The deployed RAG tool can create the local Chroma vector store from the delivery policy document when a usable vector store is not already present.
 
 ### 4. Deterministic Policy Evaluation
 
@@ -108,36 +124,45 @@ The implementation evaluates indicators such as:
 - Multiple sellers
 - Cross-state seller/customer location
 
-> **Note:** The numeric thresholds used by the implementation are operational heuristics defined in code. They are not claimed to be official thresholds from the policy document.
+> **Note:** Numeric thresholds used by the implementation are operational heuristics defined in code. They are not claimed to be official thresholds from the policy document.
 
-### 5. LLM Analysis
+### 5. Evidence-Based LLM Analysis
 
-Ollama with **Llama 3.2:3b** generates an evidence-based investigation summary using:
+OpsAgent uses **Groq** with the `openai/gpt-oss-20b` model to generate a structured investigation summary.
 
-- Investigation data
+The analysis is based on:
+
+- Investigation facts
 - ML prediction
 - Deterministic policy evaluation
 - Retrieved policy evidence
 
-The LLM is instructed not to invent policy conclusions or override deterministic results.
+The LLM is instructed to use the supplied evidence, avoid inventing policy rules, and not execute operational actions.
 
 ### 6. Human-in-the-Loop Approval
 
 OpsAgent does not independently execute consequential operational actions.
 
-A human must approve the proposed action before execution.
+A human must explicitly approve the action before execution.
 
 ```text
 Investigation
       ↓
+Policy Evaluation
+      ↓
 LLM Analysis
       ↓
 Human Approval
-   ↙       ↘
-Reject    Approve
-  ↓          ↓
-Stop       Execute
+    ↙       ↘
+ Reject     Approve
+   ↓          ↓
+ Stop       Execute
 ```
+
+The deployed application has been tested with both approval paths:
+
+- **Approve → operational action executed**
+- **Reject → no operational action executed**
 
 ---
 
@@ -150,8 +175,8 @@ Stop       Execute
 
 ### AI / LLM
 
-- Ollama
-- Llama 3.2:3b
+- Groq
+- `openai/gpt-oss-20b`
 - LangChain
 - LangGraph
 - Hugging Face
@@ -162,10 +187,12 @@ Stop       Execute
 - ChromaDB
 - LangChain Chroma
 - Hugging Face Embeddings
+- `all-MiniLM-L6-v2`
 
 ### Data / Database
 
 - PostgreSQL
+- Neon PostgreSQL
 - Pandas
 - NumPy
 - Psycopg2
@@ -175,16 +202,18 @@ Stop       Execute
 - XGBoost
 - Scikit-learn
 
-### Application
+### Application / Deployment
 
-- FastAPI
 - Streamlit
+- Streamlit Community Cloud
+- Docker
 
-### Testing / Development
+### Development
 
-- Pytest
 - Git
 - GitHub
+- VS Code
+- Python virtual environment
 
 ---
 
@@ -230,8 +259,13 @@ OpsAgent/
 │   └── rag_tool.py
 │
 ├── .gitignore
+├── Dockerfile
+├── requirements.txt
+├── runtime.txt
 └── README.md
 ```
+
+> `data/chroma/`, `.env`, Python virtual environments, logs, and database dump files are excluded from Git using `.gitignore`.
 
 ---
 
@@ -241,27 +275,27 @@ For each order, OpsAgent follows this workflow:
 
 ### Step 1 — Order Investigation
 
-The agent retrieves the order and calculates the required operational features.
+The application receives an order ID and retrieves the required business and operational data.
 
 ### Step 2 — Risk Prediction
 
-The OpsPredict XGBoost model generates a late-delivery probability.
+The OpsPredict XGBoost model generates a late-delivery probability and prediction result.
 
 ### Step 3 — Policy Retrieval
 
-The RAG system searches the operational delivery policy for relevant guidance.
+The RAG system searches the delivery operations policy for relevant evidence.
 
 ### Step 4 — Policy Evaluation
 
-Deterministic Python rules evaluate operational risk indicators.
+Deterministic Python rules evaluate the configured operational policy indicators.
 
 ### Step 5 — LLM Analysis
 
-The LLM combines the investigation facts, model prediction, policy evaluation, and retrieved policy evidence into a structured analysis.
+Groq generates a structured analysis using the investigation facts, model prediction, policy evaluation, and retrieved policy evidence.
 
 ### Step 6 — Human Approval
 
-The system pauses before executing an operational action.
+The workflow pauses and requires explicit human approval.
 
 ### Step 7 — Action
 
@@ -275,7 +309,7 @@ If rejected, no operational action is executed.
 
 The Streamlit application provides an interactive interface for investigating orders.
 
-The interface displays:
+The dashboard displays:
 
 - Order ID
 - Late-delivery probability
@@ -287,7 +321,7 @@ The interface displays:
 - Human approval controls
 - Action result
 
-Run the application with:
+Run locally with:
 
 ```bash
 streamlit run app/streamlit_app.py
@@ -295,7 +329,7 @@ streamlit run app/streamlit_app.py
 
 ---
 
-## ⚙️ Setup
+## ⚙️ Local Setup
 
 ### 1. Clone the repository
 
@@ -313,7 +347,7 @@ python -m venv .venv
 Activate it on Windows:
 
 ```powershell
-.venv\Scripts\activate
+.venv\Scriptsctivate
 ```
 
 ### 3. Install dependencies
@@ -322,44 +356,40 @@ Activate it on Windows:
 pip install -r requirements.txt
 ```
 
-### 4. Install and run Ollama
+### 4. Configure environment variables
 
-Install Ollama and pull the required model:
+Create a `.env` file in the project root.
 
-```bash
-ollama pull llama3.2:3b
-```
-
-Verify it:
-
-```bash
-ollama run llama3.2:3b
-```
-
-### 5. Configure environment variables
-
-Create a `.env` file in the project root:
+Example:
 
 ```env
-OLLAMA_MODEL=llama3.2:3b
-OLLAMA_TEMPERATURE=0
+DB_HOST=your_neon_host
+DB_PORT=5432
+DB_NAME=your_database
+DB_USER=your_user
+DB_PASSWORD=your_password
 
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_DB=businesspulse
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your_password
+GROQ_API_KEY=your_groq_api_key
+GROQ_TEMPERATURE=0
 ```
 
-> **Important:** Do not commit the `.env` file to GitHub.
+> **Important:** Never commit `.env` or API keys to GitHub.
+
+### 5. Run the application
+
+```bash
+streamlit run app/streamlit_app.py
+```
 
 ---
 
 ## 🗄️ Database
 
-OpsAgent uses the PostgreSQL database created for the BusinessPulse project.
+OpsAgent uses PostgreSQL for business and operational data.
 
-The application reads operational data from tables such as:
+The deployed application uses **Neon PostgreSQL**.
+
+The project reads data from tables including:
 
 - `orders`
 - `order_items`
@@ -369,25 +399,61 @@ The application reads operational data from tables such as:
 - `order_payments`
 - `order_reviews`
 
-The database connection is configured through environment variables.
+Database connection details are supplied through environment variables.
 
 ---
 
-## 🧪 Testing
+## 🔎 RAG Pipeline
 
-Run the available tests using:
+The delivery policy is stored in:
 
-```bash
-pytest -v
+```text
+documents/delivery_policy.txt
 ```
 
-Individual components can also be tested separately.
+The RAG pipeline:
 
-Example:
-
-```bash
-python rag/test_retriever.py
+```text
+Delivery Policy
+      ↓
+Document Loader
+      ↓
+Text Splitting
+      ↓
+Hugging Face Embeddings
+      ↓
+ChromaDB
+      ↓
+Similarity Search
+      ↓
+Retrieved Policy Evidence
+      ↓
+LLM Analysis
 ```
+
+The deployed application was tested successfully with retrieved delivery-policy evidence.
+
+---
+
+## 🤖 ML Prediction Pipeline
+
+The OpsPredict component provides the late-delivery prediction:
+
+```text
+Order ID
+   ↓
+Retrieve Business Data
+   ↓
+Generate Prediction Features
+   ↓
+OpsPredict XGBoost Model
+   ↓
+Late-Delivery Probability
+   ↓
+Prediction Result
+```
+
+The prediction is presented separately from deterministic policy evaluation so that model output is not treated as a business-policy rule.
 
 ---
 
@@ -400,12 +466,97 @@ The AI system can:
 - Investigate
 - Retrieve evidence
 - Predict risk
-- Analyze information
-- Recommend an operational review
+- Evaluate policy indicators
+- Generate analysis
+- Prepare an operational review
 
-But it does not independently execute consequential operational actions.
+But it does not independently execute the operational action.
 
 The final action requires explicit human approval.
+
+```text
+AI Investigation
+       ↓
+Evidence + Analysis
+       ↓
+Human Decision
+    ↙       ↘
+ Reject     Approve
+   ↓          ↓
+ Stop       Action
+```
+
+---
+
+## 🐳 Docker
+
+The project includes a Dockerfile for containerized deployment.
+
+Build the image:
+
+```bash
+docker build -t opsagent .
+```
+
+Run it locally:
+
+```bash
+docker run -p 8501:8501 --env-file .env opsagent
+```
+
+Docker is not required for the current Streamlit Community Cloud deployment, but the project remains container-ready.
+
+---
+
+## ☁️ Deployment
+
+### Current Deployment
+
+The live application is deployed using:
+
+**Streamlit Community Cloud**
+
+The application connects to:
+
+- Neon PostgreSQL
+- Groq API
+- RAG policy documents
+- OpsPredict model
+
+Secrets are configured through the deployment platform and are not stored in the repository.
+
+### Docker / Render
+
+The application was also containerized and tested with Docker.
+
+A Render deployment was tested, but the free Render service reached its **512 MB memory limit** while running the application. The live application therefore uses Streamlit Community Cloud instead.
+
+---
+
+## 🧪 Testing
+
+Run the available tests with:
+
+```bash
+pytest -v
+```
+
+The RAG retriever can also be tested separately:
+
+```bash
+python rag/test_retriever.py
+```
+
+The deployed application has been manually tested for:
+
+- Order investigation
+- ML prediction
+- Policy retrieval
+- Policy indicator evaluation
+- Groq analysis
+- Human approval
+- Approved operational action
+- Rejected operational action
 
 ---
 
@@ -420,7 +571,7 @@ Order ID
    ↓
 Retrieve order data
    ↓
-Calculate operational features
+Generate operational features
    ↓
 Predict late-delivery probability
    ↓
@@ -428,7 +579,7 @@ Retrieve delivery policy
    ↓
 Evaluate policy indicators
    ↓
-Generate LLM investigation
+Generate evidence-based LLM analysis
    ↓
 Request human approval
    ↓
@@ -452,8 +603,8 @@ Potential future improvements include:
 - API-based deployment
 - Authentication
 - Production monitoring
-- Cloud deployment
 - Automated evaluation of agent responses
+- Expanded observability and logging
 
 ---
 
@@ -463,4 +614,4 @@ Potential future improvements include:
 
 Computer Science & Engineering
 
-Aspiring AI / ML Engineer | Data Analyst | Agentic AI Engineer
+**Aspiring AI / ML Engineer | Data Analyst | Agentic AI Engineer**

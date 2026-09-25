@@ -1,20 +1,66 @@
+import os
+
 from langchain.tools import tool
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
+
+from rag.document_loader import load_and_split_document
 
 
 PERSIST_DIRECTORY = "data/chroma"
 
 
+# Create embeddings once
 embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 
 
-vector_store = Chroma(
-    persist_directory=PERSIST_DIRECTORY,
-    embedding_function=embeddings
-)
+def get_vector_store():
+    """
+    Load the existing Chroma vector store.
+    If it does not exist or is empty, create it from
+    the delivery policy document.
+    """
+
+    # Try loading existing Chroma database
+    if os.path.exists(PERSIST_DIRECTORY):
+
+        vector_store = Chroma(
+            persist_directory=PERSIST_DIRECTORY,
+            embedding_function=embeddings
+        )
+
+        # Check whether the collection contains documents
+        try:
+            document_count = vector_store._collection.count()
+        except Exception:
+            document_count = 0
+
+        if document_count > 0:
+            return vector_store
+
+    # Chroma does not exist or is empty.
+    # Create it from the delivery policy document.
+    print("Creating delivery policy vector database...")
+
+    documents = load_and_split_document()
+
+    vector_store = Chroma.from_documents(
+        documents=documents,
+        embedding=embeddings,
+        persist_directory=PERSIST_DIRECTORY
+    )
+
+    print(
+        f"Delivery policy vector database created "
+        f"with {len(documents)} document chunks."
+    )
+
+    return vector_store
+
+
+vector_store = get_vector_store()
 
 
 @tool

@@ -2,7 +2,11 @@ from pathlib import Path
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
-DOCUMENT_PATH = Path("documents/delivery_policy.txt")
+DOCUMENT_PATH = (
+    Path(__file__).resolve().parent.parent
+    / "documents"
+    / "delivery_policy.txt"
+)
 
 
 def load_and_split_document():
